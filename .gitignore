@@ -1,0 +1,42 @@
+# Python / Django specific files
+*.pyc
+__pycache__/
+*~$
+*.bak
+.DS_Store # Mac operating system files
+
+# Virtual Environment
+# The virtual environment created by the project itself
+venv/
+env/
+myenv/ # Your specific request
+
+# Byte-compiled / optimalized / speedup files
+*.pyd
+*.so
+
+# Settings and Secrets
+# Never commit your secret keys or sensitive settings!
+# Use environment variables or a separate, unversioned local settings file.
+local_settings.py
+settings/local.py # Or whatever file holds local/sensitive settings
+
+# Database files
+# Generally, local development databases should be ignored.
+# The `db.sqlite3` file is Django's default.
+db.sqlite3
+
+# Media/Uploads
+# User-uploaded files, which should not be in version control.
+media/
+staticfiles/ # Generated static files
+
+# Testing and Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# IDE/Editor Files
+.idea/ # IntelliJ/PyCharm
+.vscode/ # VS Code
+*.sublime-workspace
