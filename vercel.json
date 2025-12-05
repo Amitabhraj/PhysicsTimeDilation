@@ -3,7 +3,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "physicsTimeDilation/wsgi.py"
+      "dest": "api/index.py"
     }
   ]
 }
