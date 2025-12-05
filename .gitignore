@@ -10,6 +10,7 @@ __pycache__/
 venv/
 env/
 myenv/ # Your specific request
+.vscode/
 
 # Byte-compiled / optimalized / speedup files
 *.pyd
