@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Time Dilation & Length Contraction</title>
+
+    <style>
+        body {
+            background: #0b0f29;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .clock, .length-box {
+            font-size: 40px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            background: #13172f;
+            padding: 20px;
+            border-radius: 14px;
+            width: 500px;
+            margin: auto;
+        }
+
+        input[type=range] {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<img src="https://media.cheggcdn.com/study/f85/f85af29c-994c-448c-9a24-13a319b39c0b/image">
+<img src="https://i.redd.it/tw0xp25ehvc61.jpg">
+<br>
+<h1>⏱️ Time Dilation & 📏 Length Contraction</h1>
+<p>Move the slider and watch relativity in action!</p>
+
+<div class="controls">
+    <label>Velocity (Fraction of Speed of Light)</label>
+    <input type="range" min="0" max="0.99" value="0" step="0.01" id="velocity">
+    <p id="velVal">0.00c</p>
+</div>
+
+<div class="clock">Observer Clock: <span id="clockA">0.0</span>s</div>
+<div class="clock">Dilated Clock: <span id="clockB">0.0</span>s</div>
+
+<br>
+
+<!-- 📏 LENGTH CONTRACTION -->
+<div class="length-box">
+    Proper Length L₀: <span id="L0">10</span> m<br>
+    Contracted Length L′: <span id="L_contracted">10</span> m
+</div>
+
+<script>
+let tA = 0, tB = 0;
+let dilation = 1;
+
+// Proper length
+let L0 = 10;
+document.getElementById("L0").innerText = L0;
+
+// Fetch gamma + update length
+async function updateDilation() {
+    let v = parseFloat(document.getElementById("velocity").value);
+    document.getElementById("velVal").innerText = v.toFixed(2) + "c";
+
+    // Call Django API
+    let url = `/api/dilation/?velocity=${v}`;
+    let res = await fetch(url);
+    let data = await res.json();
+
+    dilation = data.dilation_factor;
+
+    // Length contraction
+    let contracted = L0 * Math.sqrt(1 - v * v);
+    document.getElementById("L_contracted").innerText = contracted.toFixed(4);
+
+    // ⬇ also update graphs
+    updateGraphs(v, dilation, contracted);
+}
+
+// Slider updates instantly (NOT setInterval)
+document.getElementById("velocity").addEventListener("input", updateDilation);
+
+// Clock Animation
+function animate() {
+    tA += 0.01;
+    tB += 0.01 / dilation;
+
+    document.getElementById("clockA").innerText = tA.toFixed(2);
+    document.getElementById("clockB").innerText = tB.toFixed(2);
+
+    requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+<h2 style="margin-top:40px;">📊 Real-Time Graphs</h2>
+
+<canvas id="gammaChart" width="500" height="250"></canvas>
+<br>
+<canvas id="lengthChart" width="500" height="250"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// ------------------- DATA ARRAYS -------------------
+let velocityPoints = [];
+let gammaPoints = [];
+let lengthPoints = [];
+
+// ------------------- GAMMA CHART --------------------
+const gammaChart = new Chart(document.getElementById("gammaChart"), {
+    type: "bar",
+    data: {
+        labels: velocityPoints,
+        datasets: [{
+            label: "Time Dilation (γ)",
+            data: gammaPoints,
+            borderColor: "cyan",
+            borderWidth: 2,
+            tension: 0.2
+        }]
+    },
+    options: {
+        animation: false,
+        scales: {
+            x: { title: { display: true, text: "Velocity (fraction of c)" }},
+            y: { title: { display: true, text: "Gamma (γ)" }}
+        }
+    }
+});
+
+// ------------------- LENGTH CHART --------------------
+const lengthChart = new Chart(document.getElementById("lengthChart"), {
+    type: "line",
+    data: {
+        labels: velocityPoints,
+        datasets: [{
+            label: "Contracted Length L′",
+            data: lengthPoints,
+            borderColor: "orange",
+            borderWidth: 2,
+            tension: 0.2
+        }]
+    },
+    options: {
+        animation: false,
+        scales: {
+            x: { title: { display: true, text: "Velocity (fraction of c)" }},
+            y: { title: { display: true, text: "Length (meters)" }}
+        }
+    }
+});
+
+// ------------------- GRAPH UPDATE FUNCTION --------------------
+function updateGraphs(v, gamma, Lprime) {
+    // Do NOT add backward values
+    if (velocityPoints.length > 0) {
+        let last = parseFloat(velocityPoints[velocityPoints.length - 1]);
+        if (v < last) return;   // Ignore backward slider movement
+    }
+
+    velocityPoints.push(v.toFixed(2));
+    gammaPoints.push(gamma);
+    lengthPoints.push(Lprime.toFixed(4));
+
+    if (velocityPoints.length > 100) {
+        velocityPoints.shift();
+        gammaPoints.shift();
+        lengthPoints.shift();
+    }
+
+    gammaChart.update();
+    lengthChart.update();
+}
+</script>
+
+</body>
+</html>
